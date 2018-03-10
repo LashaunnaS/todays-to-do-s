@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LocalStorage</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrapper">
+    <h2>Todays To-Do's</h2>
+    <p></p>
+    <ul class="to-do">
+      <li>Loading tasks...</li>
+    </ul>
+    <form class="add-items">
+      <input type="text" name="item" placeholder="Item Name" required>
+      <input type="submit" value="+ Add Item">
+    </form>
+    <button type="button" name="clear">- Clear All</button>
+    
+  </div>
+
+<script>
+  const addItems = document.querySelector('.add-items');
+  const itemsList = document.querySelector('.to-do');
+  const clearAll = document.querySelector('[name=clear]');
+  let items = JSON.parse(localStorage.getItem("items")) || [];
+
+  function addItem(e) {
+    e.preventDefault();
+    const text = (this.querySelector('[name=item]')).value;
+    const item = {
+      text,
+      done: false
+    };
+    items.push(item);
+    populateList(items, itemsList);
+    localStorage.setItem('items', JSON.stringify(items));
+    this.reset();
+  }
+
+  function populateList(tasks = [], taskList) {
+    taskList.innerHTML = tasks.map((task, i) => {
+    return `
+      <li>
+        <input type="checkbox" data-index=${i} id="item${i}" ${task.done ? 'checked' : ''} />
+        <label for="item${i}">${task.text}</label>
+      </li>
+    `;
+    }).join('')
+  }
+
+  function toggleDone(e) {
+    if (!e.target.matches('input')) return;
+    const element = e.target;
+    const index = element.dataset.index;
+    items[index].done = !items[index].done;
+    localStorage.setItem('items', JSON.stringify(items));
+    populateList(items, itemsList);
+  }
+
+  function deleteAll() {
+    localStorage.clear("items");
+    itemsList.innerHTML = '';
+    items = [];
+  }
+
+  // Runs on page load
+  addItems.addEventListener('submit', addItem);
+  itemsList.addEventListener('click', toggleDone);
+  clearAll.addEventListener('click', deleteAll)
+
+  populateList(items, itemsList);
+</script>
+
+
+</body>
+</html>
+
